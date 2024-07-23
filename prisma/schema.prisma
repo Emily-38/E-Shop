@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  adress    String
+  role      String
+  token     String?
+  isActive  Boolean  @default(false)
+  gdpr      DateTime @default(now())
+  Cart      Cart?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Product Product[]
+}
+model Type {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Product Product[]
+}
+
+model Product {
+  id            String      @id @default(uuid())
+  title         String      @unique
+  description   String
+  price         Float
+  image         String
+  CategoryId    String
+  typeId        String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  Category      Category    @relation(fields: [CategoryId], references: [id])
+  type      Type   @relation(fields: [typeId], references: [id])
+  Stock         Stock[]
+}
+
+model Stock {
+  id        String   @id @default(uuid())
+  size      String
+  quantity  Int
+  productId String
+  cartContentId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  cartContent    CartContent?      @relation(fields: [cartContentId], references: [id])
+  Product Product @relation(fields: [productId], references: [id])
+}
+
+model CartContent {
+  
+  id        String   @id @default(uuid())
+  CartId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  stock     Stock[]
+  Cart    Cart      @relation(fields: [CartId], references: [id])
+}
+
+model Cart {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  statut    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  cartContent CartContent[]
+  User        User          @relation(fields: [userId], references: [id])
+  
+}
